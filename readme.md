@@ -10,6 +10,8 @@ This is the introduction of the 94th solution for  [RSNA Screening Mammography B
 # Extracting Row Data:
 In order to minimize data extracting times, we use DALI for decoding docom using GPU. The details can be obtained from this [website](https://developer.nvidia.com/blog/rapid-data-pre-processing-with-nvidia-dali/). DALI can be used to accelerate and save the space of training and test data. The procedure is like the following Fig. 1:
 
+![avatar](https://github.com/licheng2018/RSNA-Screening-Mammography-Breast-Cancer-Detection/blob/main/figures/Fig.1.png)
+
 # Crop Data:
 Next, we will crop data to augment the image. The crop can be based on the offset of pixels as shown in Fig.2. The center points of the cropped image are overlapping areas of horizontal and vertical peaks. Fig.3 presents the comparison of original and cropped images. The reference of this section is [RSNA: Cut Off Empty Space from Images](https://www.kaggle.com/code/vslaykovsky/rsna-cut-off-empty-space-from-images). YOLO can also be a choice to detect the object, namely the breast in images. The reference of this section is [Breast Cancer - ROI (brest) extractor](https://www.kaggle.com/code/remekkinas/breast-cancer-roi-brest-extractor). Finally, Open CV has its library to get the edge of objects. The reference of this section is [NextVIT TensorRT Inference | Pytorch](https://www.kaggle.com/code/programmaticart/nextvit-tensorrt-inference-pytorch/notebook). We apply the third method to crop the objects.
 
