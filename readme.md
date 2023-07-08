@@ -11,7 +11,7 @@ This is the introduction of the 94th solution for  [RSNA Screening Mammography B
 In order to minimize data extracting times, we use DALI for decoding docom using GPU. The details can be obtained from this [website](https://developer.nvidia.com/blog/rapid-data-pre-processing-with-nvidia-dali/). DALI can be used to accelerate and save the space of training and test data. The procedure is like the following Fig. 1:
 
 # Crop Data:
-Next, we will crop data to augment the image. The crop can be based on the offset of pixels as shown in Fig.2. The center points of the cropped image are overlapping areas of horizontal and vertical peaks. Fig.3 presents the comparison of original and cropped images. The reference of this section is [RSNA: Cut Off Empty Space from Images].(https://www.kaggle.com/code/vslaykovsky/rsna-cut-off-empty-space-from-images) YOLO can also be a choice to detect the object, namely the breast in images. The reference of this section is [Breast Cancer - ROI (brest) extractor](https://www.kaggle.com/code/remekkinas/breast-cancer-roi-brest-extractor). Finally, Open CV has its library to get the edge of objects. The reference of this section is [NextVIT TensorRT Inference | Pytorch](https://www.kaggle.com/code/programmaticart/nextvit-tensorrt-inference-pytorch/notebook). We apply the third method to crop the objects.
+Next, we will crop data to augment the image. The crop can be based on the offset of pixels as shown in Fig.2. The center points of the cropped image are overlapping areas of horizontal and vertical peaks. Fig.3 presents the comparison of original and cropped images. The reference of this section is [RSNA: Cut Off Empty Space from Images](https://www.kaggle.com/code/vslaykovsky/rsna-cut-off-empty-space-from-images). YOLO can also be a choice to detect the object, namely the breast in images. The reference of this section is [Breast Cancer - ROI (brest) extractor](https://www.kaggle.com/code/remekkinas/breast-cancer-roi-brest-extractor). Finally, Open CV has its library to get the edge of objects. The reference of this section is [NextVIT TensorRT Inference | Pytorch](https://www.kaggle.com/code/programmaticart/nextvit-tensorrt-inference-pytorch/notebook). We apply the third method to crop the objects.
 
 # Sample Submission:
 Due to the imbalanced nature of the data, training the model on an unaltered training set may result in prediction biases. Fig. 4 illustrates the distribution disparity between positive and negative outcomes.
@@ -64,7 +64,26 @@ The performance is shown in Fig.8.
 
 
 # Model2:
+We also incorporated the SEResNeXt model into our study. Similar to its name suggests, SEResNeXt is a modified version of [ResNext](https://www.paperswithcode.com/method/resneXt) that incorporates [squeeze-and-excitation blocks (SE)](https://paperswithcode.com/method/squeeze-and-excitation-block). These blocks allow the network to dynamically recalibrate channel-wise features, enhancing its performance.
 
-# Model3:
+## ResNeXt：
+ResNext introduces a novel fully connected layer that redefines the actions of neural networks as a combination of splitting, transforming, and aggregating. The splitting operation divides the input vector x into low-dimensional embeddings, while the transforming operation calculates wx. Finally, the aggregating layer combines these embeddings together.
+
+The shortcut is also introduced into ResNext. The details can be seen in Fig.9. 
+
+Group convolution has other features. Splitting is essentially done by the grouped convolutional layer when it divides its input channels into groups. The grouped convolutional layer in Fig. 9(c) performs 32 groups of convolutions whose input and output channels are 4-dimensional. The grouped convolutional layer concatenates them as the outputs of the layer.
+
+## SE
+
+In deep neural networks, different channels in different feature maps usually represent different objects. Channel attention adaptively recalibrates the weight of each channel, and can be viewed as an object selection process, thus determining what to pay attention to. Hu et al. first proposed the concept of channel attention and presented SENet for this purpose. 
+
+SE blocks are divided into two parts, a squeeze module and an excitation module. Global spatial information is collected in the squeeze module by global average pooling. The excitation module captures channel-wise relationships and outputs an attention vector by using fully-connected layers and non-linear layers (ReLU and sigmoid). Then, each channel of the input feature is scaled by multiplying the corresponding element in the attention vector. Details can be seen in Fig. 10 and Fig. 11.
+
+The first is the Squeeze operation, which performs feature compression from the spatial dimension, turns the h*w*c feature into a 1*1*c feature, and obtains a vector with a global receptive field to some extent, and the number of output channels Matching the number of input feature channels, it represents the global distribution of responses on feature channels. The algorithm is very simple, it is a global average pooling.
+
+The second is the Excitation operation, which generates weights for each feature channel by introducing the w parameter, where w is a multi-layer perceptron, which is learnable, and undergoes a dimensionality reduction in the middle to reduce the amount of parameters. And through a Sigmoid function to obtain the normalized weight between 0 and 1, to complete the explicit modeling of the correlation between feature channels.
+
+The last is a Scale operation. The weight of the Excitation output is regarded as the importance of each feature channel after selection, and the channel width is multiplied and weighted to the previous features to complete the original feature in the channel dimension.
 
 # Merge Two Results:
+Lastly, we allocate 50% of the weights to each model and make predictions based on a threshold.
